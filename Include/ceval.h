@@ -139,7 +139,24 @@ PyAPI_FUNC(const char *) PyEval_GetFuncDesc(PyObject *);
 PyAPI_FUNC(PyObject *) PyEval_EvalFrame(struct _frame *);
 PyAPI_FUNC(PyObject *) PyEval_EvalFrameEx(struct _frame *f, int exc);
 #ifndef Py_LIMITED_API
+typedef PyObject* (*_py_eval_frame_func)(struct _frame *, int);
+typedef struct _frame * (*_py_get_frame_func)(void);
+typedef PyObject* (*_py_get_builtins_func)(void);
+typedef PyObject* (*_py_get_globals_func)(void);
+typedef PyObject* (*_py_get_locals_func)(void);
+typedef struct {
+    _py_eval_frame_func eval_frame;
+    _py_get_frame_func get_frame;
+    _py_get_builtins_func get_builtins;
+    _py_get_globals_func get_globals;
+    _py_get_locals_func get_locals;
+} custom_eval_functions;
 PyAPI_FUNC(PyObject *) _PyEval_EvalFrameDefault(struct _frame *f, int exc);
+PyAPI_FUNC(struct _frame *) _PyEval_GetFrameDefault(void);
+PyAPI_FUNC(PyObject *) _PyEval_GetBuiltinsDefault(void);
+PyAPI_FUNC(PyObject *) _PyEval_GetGlobalsDefault(void);
+PyAPI_FUNC(PyObject *) _PyEval_GetLocalsDefault(void);
+PyAPI_FUNC(int) _PyEval_SetCustomEval(custom_eval_functions *funcs);
 #endif
 
 /* Interface for threads.

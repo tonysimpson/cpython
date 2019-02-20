@@ -153,6 +153,10 @@ PyInterpreterState_New(void)
     interp->importlib = NULL;
     interp->import_func = NULL;
     interp->eval_frame = _PyEval_EvalFrameDefault;
+    interp->get_frame = _PyEval_GetFrameDefault;
+    interp->get_builtins = _PyEval_GetBuiltinsDefault;
+    interp->get_globals = _PyEval_GetGlobalsDefault;
+    interp->get_locals = _PyEval_GetLocalsDefault;
     interp->co_extra_user_count = 0;
 #ifdef HAVE_DLOPEN
 #if HAVE_DECL_RTLD_NOW

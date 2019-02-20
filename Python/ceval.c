@@ -4451,6 +4451,13 @@ _PyEval_GetAsyncGenFinalizer(void)
 PyObject *
 PyEval_GetBuiltins(void)
 {
+    PyInterpreterState *interp = _PyInterpreterState_GET_UNSAFE();
+    return interp->get_builtins();
+}
+
+PyObject *
+_PyEval_GetBuiltinsDefault(void)
+{
     PyFrameObject *current_frame = PyEval_GetFrame();
     if (current_frame == NULL)
         return _PyInterpreterState_GET_UNSAFE()->builtins;
@@ -4475,6 +4482,13 @@ _PyEval_GetBuiltinId(_Py_Identifier *name)
 PyObject *
 PyEval_GetLocals(void)
 {
+    PyInterpreterState *interp = _PyInterpreterState_GET_UNSAFE();
+    return interp->get_locals();
+}
+
+PyObject *
+_PyEval_GetLocalsDefault(void) 
+{
     PyFrameObject *current_frame = PyEval_GetFrame();
     if (current_frame == NULL) {
         PyErr_SetString(PyExc_SystemError, "frame does not exist");
@@ -4491,6 +4505,13 @@ PyEval_GetLocals(void)
 PyObject *
 PyEval_GetGlobals(void)
 {
+    PyInterpreterState *interp = _PyInterpreterState_GET_UNSAFE();
+    return interp->get_globals();
+}
+
+PyObject *
+_PyEval_GetGlobalsDefault(void)
+{
     PyFrameObject *current_frame = PyEval_GetFrame();
     if (current_frame == NULL)
         return NULL;
@@ -4502,8 +4523,47 @@ PyEval_GetGlobals(void)
 PyFrameObject *
 PyEval_GetFrame(void)
 {
+    PyInterpreterState *interp = _PyInterpreterState_GET_UNSAFE();
+    return interp->get_frame();
+}
+
+PyFrameObject *
+_PyEval_GetFrameDefault(void)
+{
     PyThreadState *tstate = _PyThreadState_GET();
     return _PyThreadState_GetFrame(tstate);
+}
+
+int
+_PyEval_SetCustomEval(custom_eval_functions *funcs) {
+    PyInterpreterState *interp = _PyInterpreterState_GET_UNSAFE();
+    if(interp->eval_frame != _PyEval_EvalFrameDefault) {
+        PyErr_SetString(PyExc_SystemError, "Will not set custom eval: eval_frame has changed.");
+        return 0;
+    }
+    if(interp->get_frame != _PyEval_GetFrameDefault) {
+        PyErr_SetString(PyExc_SystemError, "Will not set custom eval: get_frame has changed.");
+        return 0;
+    }
+    if(interp->get_builtins != _PyEval_GetBuiltinsDefault) {
+        PyErr_SetString(PyExc_SystemError, "Will not set custom eval: get_builtins has changed.");
+        return 0;
+    }
+    if(interp->get_globals != _PyEval_GetGlobalsDefault) {
+        PyErr_SetString(PyExc_SystemError, "Will not set custom eval: get_frame has changed.");
+        return 0;
+    }
+    if(interp->get_locals != _PyEval_GetLocalsDefault) {
+        PyErr_SetString(PyExc_SystemError, "Will not set custom eval: get_locals has changed.");
+        return 0;
+    }
+    interp->eval_frame = funcs->eval_frame;
+    interp->get_frame = funcs->get_frame;
+    interp->get_builtins = funcs->get_builtins;
+    interp->get_globals = funcs->get_globals;
+    interp->get_locals = funcs->get_locals;
+    
+    return 1;
 }
 
 int

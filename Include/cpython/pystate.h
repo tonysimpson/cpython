@@ -7,6 +7,10 @@ extern "C" {
 #endif
 
 typedef PyObject* (*_PyFrameEvalFunction)(struct _frame *, int);
+typedef struct _frame * (*_PyGetFrame)(void);
+typedef PyObject* (*_PyGetBuiltins)(void);
+typedef PyObject* (*_PyGetGlobals)(void);
+typedef PyObject* (*_PyGetLocals)(void);
 
 /* Placeholders while working on the new configuration API
  *
@@ -72,7 +76,10 @@ typedef struct _is {
     PyObject *import_func;
     /* Initialized to PyEval_EvalFrameDefault(). */
     _PyFrameEvalFunction eval_frame;
-
+    _PyGetFrame get_frame;
+    _PyGetBuiltins get_builtins;
+    _PyGetGlobals get_globals;
+    _PyGetLocals get_locals;
     Py_ssize_t co_extra_user_count;
     freefunc co_extra_freefuncs[MAX_CO_EXTRA_USERS];
 
